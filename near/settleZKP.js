@@ -11,7 +11,7 @@ module.exports = async (verification_key, public_output, signatures) => {
       request_type: 'call_function',
       finality: 'final',
       account_id: VERIFIER_CONTRACT_ID,
-      method_name: 'settle_zkp',
+      method_name: 'settleZKProof',
       args_base64: Buffer.from(JSON.stringify({
         verification_key,
         public_output,

@@ -18,7 +18,7 @@ module.exports = async () => {
       }
     });
 
-    if (!values.find(any => any.key == 'list_of_nodes'))
+    if (!values.find(any => any.key == 'nodes'))
       return {
         success: false,
         error: 'bad_request'
@@ -26,7 +26,7 @@ module.exports = async () => {
 
     return {
       success: true,
-      list_of_nodes: JSON.parse(JSON.stringify(values.find(any => any.key == 'list_of_nodes').value))
+      list_of_nodes: JSON.parse(JSON.stringify(values.find(any => any.key == 'nodes').value))
     };
   } catch (error) {
     return {

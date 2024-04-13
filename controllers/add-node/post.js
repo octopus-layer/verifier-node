@@ -1,18 +1,18 @@
-const crypto = require('crypto');
-
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const sign = require('../../utils/sign');
+const verify = require('../../utils/verify');
 
 const receiveListOfNodes = require('../../near/receiveListOfNodes');
 const sendGossip = require('../../layer/sendGossip');
 const settleNewNode = require('../../near/settleNewNode');
+
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
 module.exports = async (req, res) => {
   if (!req.body || !req.body.new_node_key)
     return res.json({ success: false, error: 'bad_request' });
 
   const signatures = req.body.signatures && Array.isArray(req.body.signatures) ? req.body.signatures : [];
-
-  const new_node_key_hash = crypto.createHash('sha256').update(req.body.new_node_key).digest('hex');
 
   try {
     const list_of_nodes_response = await receiveListOfNodes();
@@ -28,16 +28,14 @@ module.exports = async (req, res) => {
       if (!list_of_nodes.includes(public_key) || !signature)
         return res.json({ success: false, error: 'bad_request' });
 
-      const public_key_hash = crypto.createHash('sha256').update(public_key).digest('hex')
-
-      const verifier = crypto.createVerify('sha256');
-      verifier.update(new_node_key_hash);
-
-      if (!verifier.verify(public_key_hash, signature, 'base64'))
+      if (!verify(new_node_key, public_key, signature))
         return res.json({ success: false, error: 'bad_signature' });
     };
 
-    signatures.push(crypto.createSign('sha256').update(new_node_key_hash).sign(PRIVATE_KEY, 'base64'));
+    signatures.push({
+      public_key: PUBLIC_KEY,
+      signature: sign(req.body.new_node_key, PRIVATE_KEY)
+    });
 
     if (signatures.length * 0.66 >= list_of_nodes.length) {
       const response = await settleNewNode(req.body.new_node_key, signatures);

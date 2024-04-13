@@ -1,5 +1,8 @@
-const crypto = require('crypto');
 const { Proof } = require('o1js');
+
+const hash = require('../../utils/hash');
+const sign = require('../../utils/sign');
+const verify = require('../../utils/verify');
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -36,8 +39,7 @@ module.exports = async (req, res) => {
     if (verification_key_real != verification_key)
       return res.json({ success: false, error: 'bad_request' });
 
-    const output = proof.publicOutput;
-    const output_hash = crypto.createHash('sha256').update(output).digest('hex');
+    const output = JSON.stringify(proof.publicOutput);
 
     const list_of_nodes_response = await receiveListOfNodes();
 
@@ -52,19 +54,17 @@ module.exports = async (req, res) => {
       if (!list_of_nodes.includes(public_key) || !signature)
         return res.json({ success: false, error: 'bad_request' });
 
-      const public_key_hash = crypto.createHash('sha256').update(public_key).digest('hex')
-
-      const verifier = crypto.createVerify('sha256');
-      verifier.update(output_hash);
-
-      if (!verifier.verify(public_key_hash, signature, 'base64'))
+      if (!verify(output, public_key, signature))
         return res.json({ success: false, error: 'bad_signature' });
     };
 
-    signatures.push(crypto.createSign('sha256').update(output_hash).sign(PRIVATE_KEY, 'base64'));
+    signatures.push({
+      public_key: PUBLIC_KEY,
+      signature: sign(output, PRIVATE_KEY)
+    });
 
     if (signatures.length * 0.66 >= list_of_nodes.length) {
-      const response = await settleZKP(verification_key, output_hash, signatures);
+      const response = await settleZKP(verification_key, hash(output), signatures);
 
       if (!response.success)
         return res.json(response);

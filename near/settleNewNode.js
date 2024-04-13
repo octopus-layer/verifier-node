@@ -11,7 +11,7 @@ module.exports = async (new_node_key, signatures) => {
       request_type: 'call_function',
       finality: 'final',
       account_id: VERIFIER_CONTRACT_ID,
-      method_name: 'add_node',
+      method_name: 'addNode',
       args_base64: Buffer.from(JSON.stringify({
         public_key: new_node_key,
         signatures
