@@ -1,13 +1,11 @@
 const near = require('near-api-js');
 
-const VERIFIER_CONTRACT_ID = process.env.VERIFIER_CONTRACT_ID;
-
-module.exports = async () => {
+module.exports = async application_contract_id => {
   try {
     const response = await near.connection.provider.query({
       request_type: 'view_state',
       finality: 'final',
-      account_id: VERIFIER_CONTRACT_ID,
+      account_id: application_contract_id,
       prefix_base64: '',
     });
 
@@ -18,15 +16,15 @@ module.exports = async () => {
       }
     });
 
-    if (!values.list_of_nodes)
+    if (!values.find(any => any.key == 'verification_key'))
       return {
         success: false,
-        error: 'unknown_error'
+        error: 'bad_request'
       };
 
     return {
       success: true,
-      list_of_nodes: JSON.parse(JSON.stringify(values.list_of_nodes.value))
+      verification_key: JSON.parse(JSON.stringify(values.find(any => any.key == 'verification_key').value))
     };
   } catch (error) {
     return {

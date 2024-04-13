@@ -1,10 +1,10 @@
 const fetch = require('node-fetch');
 
-const receiveListOfNodes = require('./receiveListOfNodes');
+const receiveListOfNodes = require('../near/receiveListOfNodes');
 
 const NODE_URL = process.env.NODE_URL;
 
-module.exports = async (data) => {
+module.exports = async data => {
   if (!data || typeof data != 'object')
     return {
       success: false,
@@ -40,7 +40,7 @@ module.exports = async (data) => {
 
       return { success: true };
     } else if (data.type == 'settle-zkp') {
-      if (!data.proof || !data.signatures)
+      if (!data.proof || !data.application_key || !data.signatures)
         return {
           success: false,
           error: 'bad_request'
@@ -53,6 +53,7 @@ module.exports = async (data) => {
           method: 'POST',
           body: {
             proof: data.proof,
+            application_key: data.application_key,
             signatures: data.signatures
           }
         });
@@ -65,10 +66,7 @@ module.exports = async (data) => {
         error: 'bad_request'
       };
     };
-  } catch (err) {
-    return {
-      success: false,
-      error: 'unknown_error'
-    };
+  } catch (error) {
+    return { success: false, error };
   };
 };
