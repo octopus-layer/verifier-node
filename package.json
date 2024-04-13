@@ -1,0 +1,23 @@
+{
+  "name": "octopus.node",
+  "version": "1.0.0",
+  "description": "Octopus Light Nodes",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yunus Gürlek",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^3.2.5",
+    "body-parser": "^1.20.2",
+    "cluster": "^0.7.7",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http": "^0.0.1-security",
+    "node-fetch": "^2.6.9",
+    "os": "^0.1.2",
+    "path": "^0.12.7"
+  }
+}
