@@ -20,7 +20,7 @@ module.exports = async data => {
     const list_of_nodes = list_of_nodes_response.list_of_nodes;
   
     if (data.type == 'add-node') {
-      if (!data.new_node_key || !data.signatures)
+      if (!data.new_node_key || !data.new_node_url || !data.signatures)
         return {
           success: false,
           error: 'bad_request'
@@ -33,6 +33,7 @@ module.exports = async data => {
           method: 'POST',
           body: {
             new_node_key: data.new_node_key,
+            new_node_url: data.new_node_url,
             signatures: data.signatures
           }
         });

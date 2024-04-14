@@ -9,10 +9,11 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
 module.exports = async (req, res) => {
-  if (!req.body || !req.body.new_node_key)
+  if (!req.body || !req.body.new_node_key || !req.body.new_node_url)
     return res.json({ success: false, error: 'bad_request' });
 
   const signatures = req.body.signatures && Array.isArray(req.body.signatures) ? req.body.signatures : [];
+  const new_node_sign = req.body.new_node_key + req.body.new_node_url;
 
   try {
     const list_of_nodes_response = await receiveListOfNodes();
@@ -28,17 +29,17 @@ module.exports = async (req, res) => {
       if (!list_of_nodes.includes(public_key) || !signature)
         return res.json({ success: false, error: 'bad_request' });
 
-      if (!verify(new_node_key, public_key, signature))
+      if (!verify(new_node_sign, public_key, signature))
         return res.json({ success: false, error: 'bad_signature' });
     };
 
     signatures.push({
       public_key: PUBLIC_KEY,
-      signature: sign(req.body.new_node_key, PRIVATE_KEY)
+      signature: sign(new_node_sign, PRIVATE_KEY)
     });
 
     if (signatures.length * 0.66 >= list_of_nodes.length) {
-      const response = await settleNewNode(req.body.new_node_key, signatures);
+      const response = await settleNewNode(req.body.new_node_key, req.body.new_node_url, signatures);
 
       if (!response.success)
         return res.json(response);
@@ -46,6 +47,7 @@ module.exports = async (req, res) => {
       const response = await sendGossip({
         type: 'add-node',
         new_node_key: req.body.new_node_key,
+        new_node_url: req.body.new_node_url,
         signatures
       });
 

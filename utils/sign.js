@@ -1,5 +1,5 @@
 const { createSign } = require('crypto');
-const sign = createSign('SHA256');
+const sign = createSign('SHA512');
 
 module.exports = (data, private_key) => {
   sign.update(data);

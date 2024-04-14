@@ -1,5 +1,5 @@
 const { createVerify, sign } = require('crypto');
-const verify = createVerify('SHA256');
+const verify = createVerify('SHA512');
 
 module.exports = (data, public_key, signature) => {
   verify.update(data);
